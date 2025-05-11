@@ -1,0 +1,69 @@
+Arduino code to read data 
+
+#define encoder0PinA 2
+#define encoder0PinB 4
+#define motorpin1 9
+#define motorpin2 10
+#define ls1 12
+#define ls2 13
+volatile long encoder0Pos = 0;
+long newposition;
+long oldposition = 0;
+unsigned long newtime;
+unsigned long oldtime = 0;
+long vel;
+int direc = 1;
+int state1 = 255;
+int state2 = 0;
+int temp,temp2;
+{ 
+  pinMode(encoder0PinA, INPUT); 
+  digitalWrite(encoder0PinA, HIGH);       // turn on pullup resistor 
+  pinMode(encoder0PinB, INPUT); 
+  digitalWrite(encoder0PinB, HIGH);       // turn on pullup resistor 
+  attachInterrupt(0, doEncoder, RISING);  // encoDER ON PIN 2 
+  Serial.begin (9600); 
+  Serial.println("start");                // a personal quirk 
+} 
+void loop() 
+{ 
+  if (Serial.available() > 0)  temp2 = Serial.parseInt(); 
+  if(temp2)   
+  { 
+    state1 = temp2;  
+    state1 = (state1/12.0)*255 ; 
+  } 
+ // Serial.println (state1); 
+  analogWrite(motorpin1, state1); 
+  analogWrite(motorpin2, state2); 
+  if (digitalRead(ls1) || digitalRead(ls2) ) 
+  { 
+    temp = state1; 
+    state1 = state2; 
+    state2 = temp;
+direc *=-1; 
+analogWrite(motorpin1, state1); 
+analogWrite(motorpin2, state2); 
+while (digitalRead(ls1) || digitalRead(ls2)); 
+} 
+newposition = encoder0Pos; 
+newtime = millis(); 
+MCT234, Modelling and Simulation of 
+Mechatronic Systems, FALL 2022 
+vel = (abs((newposition - oldposition)) * 1000*60) / (50 * (newtime - oldtime)); 
+Serial.print (""); 
+Serial.println (vel*direc); 
+oldposition = newposition; 
+oldtime = newtime; 
+delay(5); 
+} 
+void doEncoder() 
+{  
+} 
+if(digitalRead(encoder0PinB))    encoder0Pos++; 
+else                             
+encoder0Pos--;
+}
+
+
+
